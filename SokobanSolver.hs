@@ -1,8 +1,8 @@
-import SokobanDataTypes
-import Data.Set (Set)
-import qualified Data.Set as Set
-
 module SokobanSolver where
+
+  import SokobanDataTypes
+  import Data.Set (Set)
+  import qualified Data.Set as Set
 
   solvePuzzle :: SokobanPuzzle -> Maybe [SokobanPuzzle]
   solvePuzzle startState =
