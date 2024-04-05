@@ -6,7 +6,7 @@ import Data.Maybe (fromJust)
 -- Function to print the puzzle solution
 printSolution :: [SokobanPuzzle] -> IO ()
 printSolution solutionStack = do
-    putStrLn "Moves taken to solve the puzzle:"
+    putStrLn "Solution found:"
     printDirections solutionStack
     putStrLn "Puzzle solved."
 
@@ -44,6 +44,10 @@ main = do
     case puzzle of
         Just sokoban -> do
             putStrLn "Puzzle successfully read:"
-            let solutionStack = fromJust (solvePuzzle sokoban)
-            printSolution solutionStack
+            case solvePuzzle sokoban of
+                Just steps -> do
+                    putStrLn "Moves taken to solve the puzzle:"
+                    printSolution steps
+                Nothing ->
+                    putStrLn "No solution found for this puzzle."
         Nothing -> putStrLn "Failed to read puzzle from file."
