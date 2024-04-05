@@ -123,13 +123,11 @@ module SokobanSolver where
   isBoxCollision :: (Int, Int) -> Direction -> [[TileType]] -> Bool
   isBoxCollision newPos direction gameState =
       let newNewPos = moveDirection newPos direction
-      in case getTileAt newPos gameState of
-          Box -> case getTileAt newNewPos gameState of
-              Box -> True
-              BoxGoal -> True
-              _ -> False
-          BoxGoal -> case getTileAt newNewPos gameState of
-              Box -> True
-              BoxGoal -> True
-              _ -> False
+          currentTileType = getTileAt newPos gameState
+          newTileType = getTileAt newPos gameState
+      in case (currentTileType, newTileType) of
+          (Box, Box) -> True
+          (Box, BoxGoal) -> True
+          (BoxGoal, Box) -> True
+          (BoxGoal, BoxGoal) -> True
           _ -> False
