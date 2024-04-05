@@ -96,7 +96,14 @@ module SokobanSolver where
   moveDirection (x, y) SokobanDataTypes.Right = (x + 1, y)
 
   getTileAt :: (Int, Int) -> [[TileType]] -> TileType
-  getTileAt (x,y) gameState = (gameState !! y) !! x
+  getTileAt (x,y) gameState
+      | x < 0 || y < 0 || y >= length gameState || x >= rowWidth = Wall
+      | otherwise = row !! x
+      where
+          rowWidth = case drop y gameState of
+              [] -> 0
+              (row:_) -> length row
+          row = gameState !! y
 
   moveBox :: (Int, Int) -> Direction -> [[TileType]] -> [[TileType]]
   moveBox boxPos direction gameState =
