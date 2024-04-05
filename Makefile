@@ -1,7 +1,7 @@
 GHC = ghc
-GHC_FLAGS = -o Sokoban -main-is SokobanMain -dynamic
+GHC_FLAGS = -o Sokoban -main-is Main -dynamic
 
-SOURCES = SokobanMain.hs SokobanDataTypes.hs SokobanSolver.hs SokobanInput.hs
+SOURCES = Main.hs SokobanDataTypes.hs SokobanSolver.hs SokobanInput.hs
 
 all: $(SOURCES)
 	$(GHC) $(GHC_FLAGS) $(SOURCES)
