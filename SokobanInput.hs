@@ -1,4 +1,4 @@
-module SokobanFileInput
+module SokobanInput
     ( readSokobanFromFile
     ) where
 
