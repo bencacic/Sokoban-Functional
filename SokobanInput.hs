@@ -7,7 +7,6 @@ import SokobanDataTypes
 import SokobanSolver
 import Control.Exception
 
--- Function to read a Sokoban puzzle from a file
 readSokobanFromFile :: IO (Maybe SokobanPuzzle)
 readSokobanFromFile = do
     args <- getArgs
@@ -20,7 +19,6 @@ readSokobanFromFile = do
             putStrLn "Usage: sokoban-solver <input-file>"
             return Nothing
 
--- Function to parse Sokoban puzzle from lines of text
 parseSokoban :: [String] -> Maybe SokobanPuzzle
 parseSokoban puzzleLines =
     if rows > 0 && cols > 0
@@ -31,13 +29,11 @@ parseSokoban puzzleLines =
         cols = maximum (map length puzzleLines)
         gameState = map (parseRow cols) puzzleLines
 
--- Function to parse a row of the puzzle
 parseRow :: Int -> String -> [TileType]
 parseRow cols line =
     let paddedLine = line ++ replicate (cols - length line) ' '
     in map tileTypeFromChar paddedLine
 
--- Convert character to TileType
 tileTypeFromChar :: Char -> TileType
 tileTypeFromChar 'X' = Wall
 tileTypeFromChar ' ' = Empty

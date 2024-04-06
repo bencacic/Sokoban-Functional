@@ -131,7 +131,7 @@ module SokobanSolver where
   isBoxCollision newPos direction gameState =
       let newNewPos = moveDirection newPos direction
           currentTileType = getTileAt newPos gameState
-          newTileType = getTileAt newPos gameState
+          newTileType = getTileAt newNewPos gameState
       in case (currentTileType, newTileType) of
           (Box, Box) -> True
           (Box, BoxGoal) -> True

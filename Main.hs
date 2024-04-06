@@ -36,7 +36,7 @@ showDirection current prev =
                                 Just index -> index `mod` length (head gameState)
                                 Nothing -> -1
                                 
--- Main function
+--Main function
 main :: IO ()
 main = do
     putStrLn "Testing readSokobanFromFile..."
@@ -44,6 +44,8 @@ main = do
     case puzzle of
         Just sokoban -> do
             putStrLn "Puzzle successfully read:"
+            putStrLn "Initial Puzzle State:"
+            printSokobanPuzzle sokoban
             case solvePuzzle sokoban of
                 Just steps -> do
                     putStrLn "Moves taken to solve the puzzle:"
@@ -51,3 +53,16 @@ main = do
                 Nothing ->
                     putStrLn "No solution found for this puzzle."
         Nothing -> putStrLn "Failed to read puzzle from file."
+
+printSokobanPuzzle :: SokobanPuzzle -> IO ()
+printSokobanPuzzle (SokobanPuzzle gameState) =
+    mapM_ putStrLn (map (concatMap showTile) gameState)
+    where
+        showTile :: TileType -> String
+        showTile Wall = "X"
+        showTile Empty = " "
+        showTile Player = "P"
+        showTile PlayerGoal = "O"
+        showTile Box = "B"
+        showTile BoxGoal = "H"
+        showTile Goal = "G"
