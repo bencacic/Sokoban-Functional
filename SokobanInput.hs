@@ -16,7 +16,7 @@ readSokobanFromFile = do
             let puzzleLines = lines contents
             return (parseSokoban puzzleLines)
         _ -> do
-            putStrLn "Usage: sokoban-solver <input-file>"
+            putStrLn "Usage: ./Sokoban <input-file>"
             return Nothing
 
 parseSokoban :: [String] -> Maybe SokobanPuzzle
