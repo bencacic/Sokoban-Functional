@@ -26,7 +26,7 @@ module SokobanSolver where
                         Nothing -> exploreMoves possibleMoves stack finalVisited
 
   isSolved :: SokobanPuzzle -> Bool --concat the gameState into a single list, check it for goals
-  isSolved (SokobanPuzzle gameState) = notElem Goal (concat gameState)
+  isSolved (SokobanPuzzle gameState) = notElem Goal (concat gameState) && notElem PlayerGoal (concat gameState)
 
   -- filter out visited states from set produced from possible moves
   getPossibleMoves :: SokobanPuzzle -> Set SokobanPuzzle -> [SokobanPuzzle]
@@ -36,47 +36,51 @@ module SokobanSolver where
   movePlayer :: SokobanPuzzle -> Direction -> Maybe SokobanPuzzle
   movePlayer (SokobanPuzzle gameState) direction =
       case findPlayer gameState of
-          Just (oldPlayerPos, newGameState) ->
+          Just oldPlayerPos ->
               let newPlayerPos = moveDirection oldPlayerPos direction
-                  oldTileType = getTileAt oldPlayerPos newGameState
-                  newTileType = getTileAt newPlayerPos newGameState
-                  newPos = moveDirection newPlayerPos direction
-                  isValid = isValidMove newPos direction gameState
+                  oldTileType = getTileAt oldPlayerPos gameState
+                  newTileType = getTileAt newPlayerPos gameState
+                  isValid = isValidMove newPlayerPos direction gameState
               in if isValid
                   then
-                      let (movedPlayer, movedTile, newGameState2) = case oldTileType of
+                      let (oldPlayerTile, newPlayerTile, newGameState) = case oldTileType of
                               PlayerGoal -> case newTileType of
-                                  Empty -> (Goal, Player, newGameState)
-                                  Goal -> (Goal, PlayerGoal, newGameState)
-                                  Box -> let newState = moveBox newPlayerPos direction newGameState
+                                  Empty -> (Goal, Player, gameState)
+                                  Goal -> (Goal, PlayerGoal, gameState)
+                                  Box -> let newState = moveBox newPlayerPos direction gameState
                                          in (Goal, Player, newState)
-                                  BoxGoal -> let newState = moveBox newPlayerPos direction newGameState
+                                  BoxGoal -> let newState = moveBox newPlayerPos direction gameState
                                              in (Goal, PlayerGoal, newState)
-                                  _ -> (PlayerGoal, newTileType, newGameState) -- invalid move
+                                  _ -> (PlayerGoal, newTileType, gameState) -- invalid move
                               _ -> case newTileType of
-                                  Empty -> (Empty, Player, newGameState)
-                                  Goal -> (Empty, PlayerGoal, newGameState)
-                                  Box -> let newState = moveBox newPlayerPos direction newGameState
+                                  Empty -> (Empty, Player, gameState)
+                                  Goal -> (Empty, PlayerGoal, gameState)
+                                  Box -> let newState = moveBox newPlayerPos direction gameState
                                          in (Empty, Player, newState)
-                                  BoxGoal -> let newState = moveBox newPlayerPos direction newGameState
+                                  BoxGoal -> let newState = moveBox newPlayerPos direction gameState
                                              in (Empty, PlayerGoal, newState)
-                                  _ -> (Player, newTileType, newGameState) --invalid move
-                          updatedGameState = updateGameState oldPlayerPos newPlayerPos (movedPlayer, movedTile) newGameState2
+                                  _ -> (Player, newTileType, gameState) --invalid move
+                          updatedGameState = updateGameState newPlayerPos newPlayerTile (updateGameState oldPlayerPos oldPlayerTile newGameState)
                       in Just (SokobanPuzzle updatedGameState)
-                  else Nothing
+                  else Just (SokobanPuzzle gameState)
           Nothing -> Nothing
 
-  findPlayer :: [[TileType]] -> Maybe ((Int, Int), [[TileType]])
+  findPlayer :: [[TileType]] -> Maybe (Int, Int)
   findPlayer [] = Nothing
-  findPlayer (row:rows) =
-      case findIndex Player row of
-          Just colIndex -> Just ((colIndex, length rows), row : rows)
-          Nothing ->
-              case findIndex PlayerGoal row of
-                  Just colIndex -> Just ((colIndex, length rows), row : rows)
-                  Nothing -> case findPlayer rows of
-                      Just ((playerX, playerY), newRows) -> Just ((playerX, playerY - 1), row : newRows)
-                      Nothing -> Nothing
+  findPlayer rows =
+      case findPlayer' rows 0 of
+          Just (colIndex, rowIndex) -> Just (colIndex, rowIndex)
+          Nothing -> Nothing
+      where
+          findPlayer' :: [[TileType]] -> Int -> Maybe (Int, Int)
+          findPlayer' [] _ = Nothing
+          findPlayer' (row:restRows) rowIndex =
+              case findIndex Player row of
+                  Just colIndex -> Just (colIndex, rowIndex)
+                  Nothing ->
+                      case findIndex PlayerGoal row of
+                          Just colIndex -> Just (rowIndex, colIndex)
+                          Nothing -> findPlayer' restRows (rowIndex + 1)
 
   findIndex :: Eq a => a -> [a] -> Maybe Int
   findIndex _ [] = Nothing
@@ -110,22 +114,18 @@ module SokobanSolver where
       let newPos = moveDirection boxPos direction
           newTileType = getTileAt newPos gameState
       in case newTileType of
-          Empty -> updateGameState boxPos newPos (Empty, Box) gameState
-          Goal -> updateGameState boxPos newPos (Empty, BoxGoal) gameState
+          Empty -> updateGameState newPos Box (updateGameState boxPos Empty gameState)
+          Goal -> updateGameState newPos BoxGoal (updateGameState boxPos Empty gameState)
           _ -> gameState -- invalid move
 
-  updateGameState :: (Int, Int) -> (Int, Int) -> (TileType, TileType) -> [[TileType]] -> [[TileType]]
-  updateGameState (oldRow, oldCol) (newRow, newCol) (oldTileType, newTileType) gameState =
-      let updatedRowOld = replaceAtIndex oldCol oldTileType (gameState !! oldRow)
-          updatedRowNew = replaceAtIndex newCol newTileType (gameState !! newRow)
-      in replaceAtIndex oldRow updatedRowOld (replaceAtIndex newRow updatedRowNew gameState)
+  updateGameState :: (Int, Int) -> TileType -> [[TileType]] -> [[TileType]]
+  updateGameState (col, row) tileType gameState =
+      let updatedRow = replaceAtIndex col tileType (gameState !! row)
+      in replaceAtIndex row updatedRow gameState
 
   isValidMove :: (Int, Int) -> Direction -> [[TileType]] -> Bool
   isValidMove newPos direction gameState =
-          newPos `notElem` wallPositions
-              && not (isBoxCollision newPos direction gameState)
-      where
-          wallPositions = [(x, y) | (y, row) <- zip [0..] gameState, (x, tileType) <- zip [0..] row, tileType == Wall]
+          getTileAt newPos gameState /= Wall && not (isBoxCollision newPos direction gameState)
 
   isBoxCollision :: (Int, Int) -> Direction -> [[TileType]] -> Bool
   isBoxCollision newPos direction gameState =
@@ -137,4 +137,6 @@ module SokobanSolver where
           (Box, BoxGoal) -> True
           (BoxGoal, Box) -> True
           (BoxGoal, BoxGoal) -> True
+          (Box, Wall) -> True
+          (BoxGoal, Wall) -> True
           _ -> False
