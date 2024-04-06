@@ -7,17 +7,11 @@ import SokobanDataTypes
 import SokobanSolver
 import Control.Exception
 
-readSokobanFromFile :: IO (Maybe SokobanPuzzle)
-readSokobanFromFile = do
-    args <- getArgs
-    case args of
-        [filePath] -> do
-            contents <- readFile filePath
-            let puzzleLines = lines contents
-            return (parseSokoban puzzleLines)
-        _ -> do
-            putStrLn "Usage: ./Sokoban <input-file>"
-            return Nothing
+readSokobanFromFile :: FilePath -> IO (Maybe SokobanPuzzle)
+readSokobanFromFile filePath = do
+    contents <- readFile filePath
+    let puzzleLines = lines contents
+    return (parseSokoban puzzleLines)
 
 parseSokoban :: [String] -> Maybe SokobanPuzzle
 parseSokoban puzzleLines =

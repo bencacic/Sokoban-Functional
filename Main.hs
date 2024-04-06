@@ -1,7 +1,8 @@
 import SokobanDataTypes
 import SokobanSolver
 import SokobanInput
-import Data.Maybe (fromJust)
+import SokobanTest(runTests)
+import System.Environment (getArgs)
 
 -- Function to print the puzzle solution
 printSolution :: [SokobanPuzzle] -> IO ()
@@ -39,20 +40,24 @@ showDirection current prev =
 --Main function
 main :: IO ()
 main = do
-    putStrLn "Testing readSokobanFromFile..."
-    puzzle <- readSokobanFromFile
-    case puzzle of
-        Just sokoban -> do
-            putStrLn "Puzzle successfully read:"
-            putStrLn "Initial Puzzle State:"
-            printSokobanPuzzle sokoban
-            case solvePuzzle sokoban of
-                Just steps -> do
-                    putStrLn "Moves taken to solve the puzzle:"
-                    printSolution steps
-                Nothing ->
-                    putStrLn "No solution found for this puzzle."
-        Nothing -> putStrLn "Failed to read puzzle from file."
+    args <- getArgs
+    case args of
+        ["test"] -> runTests
+        [filePath] -> do
+            puzzle <- readSokobanFromFile filePath
+            case puzzle of
+                Just sokoban -> do
+                    putStrLn "Puzzle successfully read:"
+                    putStrLn "Initial Puzzle State:"
+                    printSokobanPuzzle sokoban
+                    case solvePuzzle sokoban of
+                        Just steps -> do
+                            putStrLn "Moves taken to solve the puzzle:"
+                            printSolution steps
+                        Nothing ->
+                            putStrLn "No solution found for this puzzle."
+                Nothing -> putStrLn "Failed to read puzzle from file."
+        _ -> putStrLn "Usage: ./Sokoban <input-file>"
 
 printSokobanPuzzle :: SokobanPuzzle -> IO ()
 printSokobanPuzzle (SokobanPuzzle gameState) =
