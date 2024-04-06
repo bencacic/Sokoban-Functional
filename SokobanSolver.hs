@@ -26,9 +26,7 @@ module SokobanSolver where
                         Nothing -> exploreMoves possibleMoves stack finalVisited
 
   isSolved :: SokobanPuzzle -> Bool --concat the gameState into a single list, check it for goals
-  isSolved (SokobanPuzzle gameState) = notElem Goal concatState && notElem PlayerGoal concatState
-      where
-          concatState = concat gameState
+  isSolved (SokobanPuzzle gameState) = notElem Goal (concat gameState)
 
   -- filter out visited states from set produced from possible moves
   getPossibleMoves :: SokobanPuzzle -> Set SokobanPuzzle -> [SokobanPuzzle]
