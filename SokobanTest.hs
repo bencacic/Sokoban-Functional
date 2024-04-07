@@ -7,6 +7,7 @@ import System.FilePath
 import System.Environment (getArgs)
 import Control.Monad (mapM_)
 import Data.List (sort)
+import Control.Exception (try, SomeException)
 
 runTests :: IO ()
 runTests = do
@@ -18,13 +19,14 @@ runTests = do
 testPuzzle :: FilePath -> IO ()
 testPuzzle filePath = do
     putStrLn $ "Testing puzzle: " ++ filePath
-    puzzle <- readSokobanFromFile filePath
-    case puzzle of
-        Just sokoban -> do
-            case solvePuzzle sokoban of
-                Just steps -> do
-                    putStrLn $ "Puzzle solved: " ++ takeFileName filePath
-                Nothing ->
-                    putStrLn $ "Puzzle unsolvable: " ++ takeFileName filePath
-        Nothing ->
-            putStrLn $ "Failed to read puzzle from file: " ++ takeFileName filePath
+    result <- try $ do
+        puzzle <- readSokobanFromFile filePath
+        case puzzle of
+            Just sokoban -> do
+                case solvePuzzle sokoban of
+                    Just _ -> putStrLn $ "Puzzle solved: " ++ takeFileName filePath ++ "\n"
+                    Nothing -> putStrLn $ "Puzzle unsolvable: " ++ takeFileName filePath ++ "\n"
+            Nothing -> putStrLn $ "Failed to read puzzle from file: " ++ takeFileName filePath
+    case result of
+        Left (e :: SomeException) -> putStrLn $ "Error occurred: " ++ show e ++ "\n"
+        _ -> return ()
