@@ -19,10 +19,12 @@ parseSokoban puzzleLines = do
         cols = maximum (map length puzzleLines)
         gameState = mapM (parseRow cols) puzzleLines
     case gameState of
-        Right gs -> if rows > 0 && cols > 0 && length (filter (== Player) (concat gs)) <= 1
+        Right gs -> if rows > 0 && cols > 0 && playerCount gs <= 1
                         then Just (SokobanPuzzle gs)
                         else Nothing
         Left err -> Nothing
+  where
+    playerCount gs = length $ filter (\x -> x == Player || x == PlayerGoal) (concat gs)
 
 parseRow :: Int -> String -> Either String [TileType]
 parseRow cols line =
