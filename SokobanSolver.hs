@@ -31,7 +31,7 @@ module SokobanSolver where
   -- filter out visited states from set produced from possible moves
   getPossibleMoves :: SokobanPuzzle -> Set SokobanPuzzle -> [SokobanPuzzle]
   getPossibleMoves puzzle visited = filter (`Set.notMember` visited)
-                   $ mapMaybe (\dir -> movePlayer puzzle dir) [Up, Down, SokobanDataTypes.Left, SokobanDataTypes.Right]
+                   $ mapMaybe (\dir -> movePlayer puzzle dir) [Up, Down, SLeft, SRight]
 
   movePlayer :: SokobanPuzzle -> Direction -> Maybe SokobanPuzzle
   movePlayer (SokobanPuzzle gameState) direction =
@@ -96,8 +96,8 @@ module SokobanSolver where
   moveDirection :: (Int, Int) -> Direction -> (Int, Int)
   moveDirection (x, y) Up = (x, y - 1)
   moveDirection (x, y) Down = (x, y + 1)
-  moveDirection (x, y) SokobanDataTypes.Left = (x - 1, y)
-  moveDirection (x, y) SokobanDataTypes.Right = (x + 1, y)
+  moveDirection (x, y) SLeft = (x - 1, y)
+  moveDirection (x, y) SRight = (x + 1, y)
 
   getTileAt :: (Int, Int) -> [[TileType]] -> TileType
   getTileAt (x,y) gameState

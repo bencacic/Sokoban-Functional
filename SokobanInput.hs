@@ -19,10 +19,10 @@ parseSokoban puzzleLines = do
         cols = maximum (map length puzzleLines)
         gameState = mapM (parseRow cols) puzzleLines
     case gameState of
-        Prelude.Right gs -> if rows > 0 && cols > 0 && length (filter (== Player) (concat gs)) == 1
+        Right gs -> if rows > 0 && cols > 0 && length (filter (== Player) (concat gs)) <= 1
                         then Just (SokobanPuzzle gs)
                         else Nothing
-        Prelude.Left err -> Nothing
+        Left err -> Nothing
 
 parseRow :: Int -> String -> Either String [TileType]
 parseRow cols line =
@@ -30,11 +30,11 @@ parseRow cols line =
     in sequence (map tileTypeFromChar paddedLine)
 
 tileTypeFromChar :: Char -> Either String TileType
-tileTypeFromChar 'X' = Prelude.Right Wall
-tileTypeFromChar ' ' = Prelude.Right Empty
-tileTypeFromChar 'P' = Prelude.Right Player
-tileTypeFromChar 'O' = Prelude.Right PlayerGoal
-tileTypeFromChar 'B' = Prelude.Right Box
-tileTypeFromChar 'H' = Prelude.Right BoxGoal
-tileTypeFromChar 'G' = Prelude.Right Goal
-tileTypeFromChar _   = Prelude.Left "Invalid character in Sokoban puzzle"
+tileTypeFromChar 'X' = Right Wall
+tileTypeFromChar ' ' = Right Empty
+tileTypeFromChar 'P' = Right Player
+tileTypeFromChar 'O' = Right PlayerGoal
+tileTypeFromChar 'B' = Right Box
+tileTypeFromChar 'H' = Right BoxGoal
+tileTypeFromChar 'G' = Right Goal
+tileTypeFromChar _   = Left "Invalid character in Sokoban puzzle"
