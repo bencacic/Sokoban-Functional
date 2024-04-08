@@ -67,9 +67,9 @@ movePlayer (SokobanPuzzle gameState) direction visited =
                 BoxGoal ->
                     let boxNewPos = moveDirection newPos direction
                         boxNewTile = getTileAt boxNewPos gameState
-                    in if boxNewTile == Empty
-                        then updateGameState playerPos playerBelow (updateGameState newPos PlayerGoal
-                             (updateGameState boxNewPos Box gameState))
+                    in if boxNewTile == Empty || boxNewTile == Goal
+                        then updateGameState playerPos playerBelow (updateGameState newPos PlayerGoal (updateGameState
+                             boxNewPos (if boxNewTile == Goal then BoxGoal else Box) gameState))
                         else gameState
                 -- Player cannot move to the new tile
                 _ -> gameState
