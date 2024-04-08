@@ -50,6 +50,10 @@ movePlayer (SokobanPuzzle gameState) direction visited =
             Player -> (Player, Empty)
             PlayerGoal -> (PlayerGoal, Goal)
             _ -> (Empty, Empty)
+        (boxType, newPlayer) = case newTile of
+            Box -> (Box, Player)
+            BoxGoal -> (BoxGoal, PlayerGoal)
+            _ -> (Empty, Empty)
         newGameState =
             if playerType == Player || playerType == PlayerGoal
             then case newTile of
@@ -57,18 +61,11 @@ movePlayer (SokobanPuzzle gameState) direction visited =
                 Empty -> updateGameState playerPos playerBelow (updateGameState newPos Player gameState)
                 Goal -> updateGameState playerPos playerBelow (updateGameState newPos PlayerGoal gameState)
                 -- Player tries to move a box
-                Box ->
+                _ | boxType == Box || boxType == BoxGoal ->
                     let boxNewPos = moveDirection newPos direction
                         boxNewTile = getTileAt boxNewPos gameState
                     in if boxNewTile == Empty || boxNewTile == Goal
-                        then updateGameState playerPos playerBelow (updateGameState newPos Player (updateGameState
-                             boxNewPos (if boxNewTile == Goal then BoxGoal else Box) gameState))
-                        else gameState
-                BoxGoal ->
-                    let boxNewPos = moveDirection newPos direction
-                        boxNewTile = getTileAt boxNewPos gameState
-                    in if boxNewTile == Empty || boxNewTile == Goal
-                        then updateGameState playerPos playerBelow (updateGameState newPos PlayerGoal (updateGameState
+                        then updateGameState playerPos playerBelow (updateGameState newPos newPlayer (updateGameState
                              boxNewPos (if boxNewTile == Goal then BoxGoal else Box) gameState))
                         else gameState
                 -- Player cannot move to the new tile
