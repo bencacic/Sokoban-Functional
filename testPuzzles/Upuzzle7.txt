@@ -1,6 +1,5 @@
-﻿XXXXXXXXXXXX
-X         X
-X B  GX    X
-X    X     X
-XXXXXXXXXXXX
+XXXXXXX
+XP BG X
+XX B XX
+XXXXGXX
 

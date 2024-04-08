@@ -18,7 +18,6 @@ runTests = do
 
 testPuzzle :: FilePath -> IO ()
 testPuzzle filePath = do
-    putStrLn $ "Testing puzzle: " ++ filePath
     result <- try $ do
         puzzle <- readSokobanFromFile filePath
         case puzzle of
@@ -26,7 +25,7 @@ testPuzzle filePath = do
                 case solvePuzzle sokoban of
                     Just _ -> putStrLn $ "Puzzle solved: " ++ takeFileName filePath ++ "\n"
                     Nothing -> putStrLn $ "Puzzle unsolvable: " ++ takeFileName filePath ++ "\n"
-            Nothing -> putStrLn $ "Failed to read puzzle from file: " ++ takeFileName filePath
+            Nothing -> putStrLn $ "Failed to read puzzle from file: " ++ takeFileName filePath ++ "\n"
     case result of
         Left (e :: SomeException) -> putStrLn $ "Error occurred: " ++ show e ++ "\n"
         _ -> return ()
