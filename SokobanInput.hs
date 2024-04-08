@@ -1,3 +1,10 @@
+{- |
+Module      :  SokobanInput
+Description :  Handles the input and puzzle reading from a file.
+
+Creators  :  bcaci729@mtroyal.ca, kcaro419@mtroyal.ca, marab065@mtroyal.ca
+
+-}
 module SokobanInput
     ( readSokobanFromFile
     ) where
@@ -13,6 +20,8 @@ readSokobanFromFile filePath = do
     let puzzleLines = lines contents
     return (parseSokoban puzzleLines)
 
+
+-- Parses a puzzle state from a list that contains lines from the input file
 -- parseSokoban :: [String] -> Maybe SokobanPuzzle
 -- parseSokoban puzzleLines = do
 --     let rows = length puzzleLines
@@ -44,11 +53,13 @@ parseSokoban puzzleLines = do
     numBoxes    gs = length  (filter (\x -> x == Box) (concat gs))
     numGoals    gs = length  (filter (\x -> x == Goal) (concat gs))
 
+-- Converts each character from a line into a tile type
 parseRow :: Int -> String -> Either String [TileType]
 parseRow cols line =
     let paddedLine = line ++ replicate (cols - length line) ' '
     in sequence (map tileTypeFromChar paddedLine)
 
+-- Stores a character from the input file into a tile type
 tileTypeFromChar :: Char -> Either String TileType
 tileTypeFromChar 'X' = Right Wall
 tileTypeFromChar ' ' = Right Empty

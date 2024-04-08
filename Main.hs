@@ -1,17 +1,24 @@
+{- |
+Module      :  Main
+Description :  Contains the main for the sokoban solver as well as output.
+
+Creators  :  bcaci729@mtroyal.ca, kcaro419@mtroyal.ca, marab065@mtroyal.ca
+
+-}
 import SokobanDataTypes
 import SokobanSolver
 import SokobanInput
 import SokobanTest(runTests)
 import System.Environment (getArgs)
 
--- Function to print the puzzle solution
+-- Prints the puzzle solution
 printSolution :: [SokobanPuzzle] -> IO ()
 printSolution solutionStack = do
     putStrLn "Solution found:"
     printIntermediateStates solutionStack
     putStrLn "Puzzle solved."
 
--- Function to print the intermediate states of the puzzle with directions
+-- Prints the direction the player has gone between two puzzle states
 printIntermediateStates :: [SokobanPuzzle] -> IO ()
 printIntermediateStates [] = return ()
 printIntermediateStates [finalState] = do
@@ -23,7 +30,7 @@ printIntermediateStates (current:next:rest) = do
     printSokobanPuzzle next
     printIntermediateStates (next:rest)
 
--- Function to print the directions between puzzle states
+-- Determines the direction of movement between two puzzle states
 showDirection :: SokobanPuzzle -> SokobanPuzzle -> String
 showDirection current next = 
     case (playerRow current, playerCol current, playerRow next, playerCol next) of
@@ -62,6 +69,7 @@ main = do
                 Nothing -> putStrLn "Failed to read puzzle from file."
         _ -> putStrLn "Usage: ./Sokoban <input-file>"
 
+-- Prints the state of a sokoban puzzle
 printSokobanPuzzle :: SokobanPuzzle -> IO ()
 printSokobanPuzzle (SokobanPuzzle gameState) =
     mapM_ putStrLn (map (concatMap showTile) gameState)

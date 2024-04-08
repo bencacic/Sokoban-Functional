@@ -1,3 +1,10 @@
+{- |
+Module      :  SokobanSolver
+Description :  The solver for a Sokoban puzzle.
+
+Creators  :  bcaci729@mtroyal.ca, kcaro419@mtroyal.ca, marab065@mtroyal.ca
+
+-}
 module SokobanSolver where
 
 import SokobanDataTypes
@@ -5,11 +12,11 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Maybe (mapMaybe)
 
--- Function to solve the Sokoban puzzle
+-- Creates a set containing only the initial state of the puzzle
 solvePuzzle :: SokobanPuzzle -> Maybe [SokobanPuzzle]
 solvePuzzle startState = solve [(startState, [])] Set.empty
 
--- Function to solve the puzzle using iteration
+-- Logic for the search algorithm.
 solve :: [(SokobanPuzzle, [SokobanPuzzle])] -> Set SokobanPuzzle -> Maybe [SokobanPuzzle]
 solve [] _ = Nothing
 solve ((current, path):stack) visited
@@ -21,7 +28,7 @@ solve ((current, path):stack) visited
             newStack = [(nextState, current:path) | nextState <- nextStates] ++ stack
         in solve newStack visited'
 
--- Function to check if the puzzle is solved
+-- Determines if the puzzle is successfully solved
 isSolved :: SokobanPuzzle -> Bool
 isSolved (SokobanPuzzle gameState) = notElem Goal (concat gameState) && notElem PlayerGoal (concat gameState)
 
@@ -32,7 +39,7 @@ getPossibleMoves puzzle visited =
                , let newPuzzle = movePlayer puzzle dir visited
                , isValidMove newPuzzle visited]
 
--- Function to move the player in a specified direction
+-- Checks if a player move is valid and then updates the players position.
 movePlayer :: SokobanPuzzle -> Direction -> Set SokobanPuzzle -> SokobanPuzzle
 movePlayer (SokobanPuzzle gameState) direction visited =
     let playerPos = getPlayerPosition gameState
@@ -63,12 +70,12 @@ movePlayer (SokobanPuzzle gameState) direction visited =
 
 
 
--- Function to check if a move is valid
+-- Determines if a move is valid or not
 isValidMove :: SokobanPuzzle -> Set SokobanPuzzle -> Bool
 isValidMove puzzle visited =
     notElem puzzle visited
 
--- Function to get the position of the player in the game state
+-- Gets the position of the player in the game state
 getPlayerPosition :: [[TileType]] -> (Int, Int)
 getPlayerPosition gameState = 
     let rows = length gameState
@@ -78,27 +85,27 @@ getPlayerPosition gameState =
         then (-1, -1) -- Player not found
         else head playerPositions
 
--- Function to get the tile type at a given position in the game state
+-- Gets the tile type at a given position in the game state
 getTileAt :: (Int, Int) -> [[TileType]] -> TileType
 getTileAt (x, y) gameState
     | x < 0 || y < 0 || y >= length gameState || x >= length (head gameState) = Wall
     | otherwise = (gameState !! y) !! x
 
--- Function to update the game state with a new tile at a given position
+-- Updates the game state with a new tile at a given position
 updateGameState :: (Int, Int) -> TileType -> [[TileType]] -> [[TileType]]
 updateGameState (x, y) tileType gameState =
     let (before, row:after) = splitAt y gameState
         newRow = replaceAtIndex x tileType row
     in before ++ newRow : after
 
--- Function to replace an element at a specific index in a list
+-- Replaces an element at a specific index in a list
 replaceAtIndex :: Int -> a -> [a] -> [a]
 replaceAtIndex _ _ [] = []
 replaceAtIndex i x (y:ys)
     | i == 0 = x : ys
     | otherwise = y : replaceAtIndex (i - 1) x ys
 
--- Function to move in a specified direction
+-- Moves in a specified direction
 moveDirection :: (Int, Int) -> Direction -> (Int, Int)
 moveDirection (x, y) Up = (x, y - 1)
 moveDirection (x, y) Down = (x, y + 1)
