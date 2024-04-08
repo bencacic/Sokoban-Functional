@@ -32,40 +32,48 @@ solve ((current, path):stack) visited
 isSolved :: SokobanPuzzle -> Bool
 isSolved (SokobanPuzzle gameState) = notElem Goal (concat gameState) && notElem PlayerGoal (concat gameState)
 
--- Function to get possible moves from the current state
+-- Gets possible moves from the current state, and checks them for validity
 getPossibleMoves :: SokobanPuzzle -> Set SokobanPuzzle -> [SokobanPuzzle]
 getPossibleMoves puzzle visited =
     [newPuzzle | dir <- [Up, Down, SLeft, SRight]
                , let newPuzzle = movePlayer puzzle dir visited
                , isValidMove newPuzzle visited]
 
--- Checks if a player move is valid and then updates the players position.
+-- Updates the players position.
 movePlayer :: SokobanPuzzle -> Direction -> Set SokobanPuzzle -> SokobanPuzzle
 movePlayer (SokobanPuzzle gameState) direction visited =
     let playerPos = getPlayerPosition gameState
         newPos = moveDirection playerPos direction
         currentTile = getTileAt playerPos gameState
         newTile = getTileAt newPos gameState
+        (playerType, playerBelow) = case currentTile of
+            Player -> (Player, Empty)
+            PlayerGoal -> (PlayerGoal, Goal)
+            _ -> (Empty, Empty)
         newGameState =
-            case (currentTile, newTile) of
+            if playerType == Player || playerType == PlayerGoal
+            then case newTile of
                 -- Player moves to an empty tile or goal
-                (Player, Empty) -> updateGameState playerPos Empty (updateGameState newPos Player gameState)
-                (Player, Goal) -> updateGameState playerPos Empty (updateGameState newPos PlayerGoal gameState)
+                Empty -> updateGameState playerPos playerBelow (updateGameState newPos Player gameState)
+                Goal -> updateGameState playerPos playerBelow (updateGameState newPos PlayerGoal gameState)
                 -- Player tries to move a box
-                (Player, Box) ->
+                Box ->
                     let boxNewPos = moveDirection newPos direction
                         boxNewTile = getTileAt boxNewPos gameState
                     in if boxNewTile == Empty || boxNewTile == Goal
-                        then updateGameState playerPos Empty (updateGameState newPos Player (updateGameState boxNewPos (if boxNewTile == Goal then BoxGoal else Box) gameState))
+                        then updateGameState playerPos playerBelow (updateGameState newPos Player (updateGameState
+                             boxNewPos (if boxNewTile == Goal then BoxGoal else Box) gameState))
                         else gameState
-                (Player, BoxGoal) ->
+                BoxGoal ->
                     let boxNewPos = moveDirection newPos direction
                         boxNewTile = getTileAt boxNewPos gameState
                     in if boxNewTile == Empty
-                        then updateGameState playerPos Empty (updateGameState newPos PlayerGoal (updateGameState boxNewPos Box gameState))
+                        then updateGameState playerPos playerBelow (updateGameState newPos PlayerGoal
+                             (updateGameState boxNewPos Box gameState))
                         else gameState
                 -- Player cannot move to the new tile
                 _ -> gameState
+            else gameState
     in SokobanPuzzle newGameState
 
 
@@ -80,16 +88,22 @@ getPlayerPosition :: [[TileType]] -> (Int, Int)
 getPlayerPosition gameState = 
     let rows = length gameState
         cols = length (head gameState)
-        playerPositions = [(i, j) | i <- [0..rows-1], j <- [0..cols-1], getTileAt (i, j) gameState == Player || getTileAt (i, j) gameState == PlayerGoal]
+        playerPositions = [(i, j) | i <- [0..rows-1], j <- [0..cols-1], getTileAt (i, j) gameState == Player ||
+                          getTileAt (i, j) gameState == PlayerGoal]
     in if null playerPositions
         then (-1, -1) -- Player not found
         else head playerPositions
 
 -- Gets the tile type at a given position in the game state
 getTileAt :: (Int, Int) -> [[TileType]] -> TileType
-getTileAt (x, y) gameState
-    | x < 0 || y < 0 || y >= length gameState || x >= length (head gameState) = Wall
-    | otherwise = (gameState !! y) !! x
+getTileAt (x,y) gameState
+    | x < 0 || y < 0 || y >= length gameState || x >= rowWidth = Wall
+    | otherwise = row !! x
+    where
+        rowWidth = case drop y gameState of
+            [] -> 0
+            (row:_) -> length row
+        row = gameState !! y
 
 -- Updates the game state with a new tile at a given position
 updateGameState :: (Int, Int) -> TileType -> [[TileType]] -> [[TileType]]

@@ -22,27 +22,15 @@ readSokobanFromFile filePath = do
 
 
 -- Parses a puzzle state from a list that contains lines from the input file
--- parseSokoban :: [String] -> Maybe SokobanPuzzle
--- parseSokoban puzzleLines = do
---     let rows = length puzzleLines
---         cols = maximum (map length puzzleLines)
---         gameState = mapM (parseRow cols) puzzleLines
---     case gameState of
---         Right gs -> if rows > 0 && cols > 0 && playerCount gs <= 1
---                         then Just (SokobanPuzzle gs)
---                         else Nothing
---         Left err -> Nothing
---   where
---     playerCount gs = length $ filter (\x -> x == Player || x == PlayerGoal) (concat gs)
 parseSokoban :: [String] -> Maybe SokobanPuzzle
 parseSokoban puzzleLines = do
     let rows = length puzzleLines
         cols = maximum (map length puzzleLines)
         gameState = mapM (parseRow cols) puzzleLines
     case gameState of
-        Right gs -> if playerCount gs == 0 && numGoals gs > 0 
+        Right gs -> if playerCount gs == 0 && numGoals gs > 0
                         then Nothing
-                    else if numGoals gs > numBoxes gs 
+                    else if numGoals gs > numBoxes gs
                         then Nothing
                     else if rows > 0 && cols > 0 && playerCount gs <= 1
                         then Just (SokobanPuzzle gs)
