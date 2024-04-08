@@ -1,40 +1,37 @@
-{- |
-Module      :  Main
-Description :  Contains the main for the sokoban solver as well as output.
-
-Creators  :  bcaci729@mtroyal.ca, kcaro419@mtroyal.ca, marab065@mtroyal.ca
-
--}
 import SokobanDataTypes
 import SokobanSolver
 import SokobanInput
 import SokobanTest(runTests)
 import System.Environment (getArgs)
 
--- Prints the puzzle solution
+-- Function to print the puzzle solution
 printSolution :: [SokobanPuzzle] -> IO ()
 printSolution solutionStack = do
     putStrLn "Solution found:"
-    printDirections solutionStack
+    printIntermediateStates solutionStack
     putStrLn "Puzzle solved."
 
--- Prints the direction the player has gone between two puzzle states
-printDirections :: [SokobanPuzzle] -> IO ()
-printDirections [] = return ()
-printDirections [_] = return ()
-printDirections (current:prev:rest) = do
-    putStrLn (showDirection current prev)
-    printDirections (prev:rest)
+-- Function to print the intermediate states of the puzzle with directions
+printIntermediateStates :: [SokobanPuzzle] -> IO ()
+printIntermediateStates [] = return ()
+printIntermediateStates [finalState] = do
+    putStrLn "Final State:"
+    printSokobanPuzzle finalState
+printIntermediateStates (current:next:rest) = do
+    let direction = showDirection current next
+    putStrLn $ "Intermediate State: " ++ direction
+    printSokobanPuzzle next
+    printIntermediateStates (next:rest)
 
--- Determines the direction of movement between two puzzle states
+-- Function to print the directions between puzzle states
 showDirection :: SokobanPuzzle -> SokobanPuzzle -> String
-showDirection current prev = 
-    case (playerRow current, playerCol current, playerRow prev, playerCol prev) of
-        (rowCurr, colCurr, rowPrev, colPrev)
-            | rowCurr == rowPrev && colCurr < colPrev -> "Left"
-            | rowCurr == rowPrev && colCurr > colPrev -> "Right"
-            | rowCurr < rowPrev && colCurr == colPrev -> "Up"
-            | rowCurr > rowPrev && colCurr == colPrev -> "Down"
+showDirection current next = 
+    case (playerRow current, playerCol current, playerRow next, playerCol next) of
+        (rowCurr, colCurr, rowNext, colNext)
+            | rowCurr == rowNext && colCurr < colNext -> "right"
+            | rowCurr == rowNext && colCurr > colNext -> "Left"
+            | rowCurr < rowNext && colCurr == colNext -> "Down"
+            | rowCurr > rowNext && colCurr == colNext -> "Up"
             | otherwise -> "Unknown"
     where 
         playerRow (SokobanPuzzle gameState) = case findIndex Player (concat gameState) of
@@ -43,8 +40,7 @@ showDirection current prev =
         playerCol (SokobanPuzzle gameState) = case findIndex Player (concat gameState) of
                                 Just index -> index `mod` length (head gameState)
                                 Nothing -> -1
-                                
--- Main function
+--Main function
 main :: IO ()
 main = do
     args <- getArgs
@@ -66,7 +62,6 @@ main = do
                 Nothing -> putStrLn "Failed to read puzzle from file."
         _ -> putStrLn "Usage: ./Sokoban <input-file>"
 
--- Prints the state of a sokoban puzzle
 printSokobanPuzzle :: SokobanPuzzle -> IO ()
 printSokobanPuzzle (SokobanPuzzle gameState) =
     mapM_ putStrLn (map (concatMap showTile) gameState)
