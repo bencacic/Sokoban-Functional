@@ -13,18 +13,36 @@ readSokobanFromFile filePath = do
     let puzzleLines = lines contents
     return (parseSokoban puzzleLines)
 
+-- parseSokoban :: [String] -> Maybe SokobanPuzzle
+-- parseSokoban puzzleLines = do
+--     let rows = length puzzleLines
+--         cols = maximum (map length puzzleLines)
+--         gameState = mapM (parseRow cols) puzzleLines
+--     case gameState of
+--         Right gs -> if rows > 0 && cols > 0 && playerCount gs <= 1
+--                         then Just (SokobanPuzzle gs)
+--                         else Nothing
+--         Left err -> Nothing
+--   where
+--     playerCount gs = length $ filter (\x -> x == Player || x == PlayerGoal) (concat gs)
 parseSokoban :: [String] -> Maybe SokobanPuzzle
 parseSokoban puzzleLines = do
     let rows = length puzzleLines
         cols = maximum (map length puzzleLines)
         gameState = mapM (parseRow cols) puzzleLines
     case gameState of
-        Right gs -> if rows > 0 && cols > 0 && playerCount gs <= 1
+        Right gs -> if playerCount gs == 0 && numGoals gs > 0 
+                        then Nothing
+                    else if numGoals gs > numBoxes gs 
+                        then Nothing
+                    else if rows > 0 && cols > 0 && playerCount gs <= 1
                         then Just (SokobanPuzzle gs)
                         else Nothing
         Left err -> Nothing
   where
     playerCount gs = length $ filter (\x -> x == Player || x == PlayerGoal) (concat gs)
+    numBoxes    gs = length  (filter (\x -> x == Box) (concat gs))
+    numGoals    gs = length  (filter (\x -> x == Goal) (concat gs))
 
 parseRow :: Int -> String -> Either String [TileType]
 parseRow cols line =
