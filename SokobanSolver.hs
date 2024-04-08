@@ -76,8 +76,6 @@ movePlayer (SokobanPuzzle gameState) direction visited =
             else gameState
     in SokobanPuzzle newGameState
 
-
-
 -- Determines if a move is valid or not
 isValidMove :: SokobanPuzzle -> Set SokobanPuzzle -> Bool
 isValidMove puzzle visited =
@@ -85,14 +83,20 @@ isValidMove puzzle visited =
 
 -- Gets the position of the player in the game state
 getPlayerPosition :: [[TileType]] -> (Int, Int)
-getPlayerPosition gameState = 
-    let rows = length gameState
-        cols = length (head gameState)
-        playerPositions = [(i, j) | i <- [0..rows-1], j <- [0..cols-1], getTileAt (i, j) gameState == Player ||
-                          getTileAt (i, j) gameState == PlayerGoal]
-    in if null playerPositions
-        then (-1, -1) -- Player not found
-        else head playerPositions
+getPlayerPosition rows =
+    case findPlayer rows 0 of
+        Just (colIndex, rowIndex) -> (colIndex, rowIndex)
+        Nothing -> (-1, -1)
+  where
+    findPlayer :: [[TileType]] -> Int -> Maybe (Int, Int)
+    findPlayer [] _ = Nothing
+    findPlayer (row:restRows) rowIndex =
+        case findIndex Player row of
+            Just colIndex -> Just (colIndex, rowIndex)
+            Nothing ->
+                case findIndex PlayerGoal row of
+                    Just colIndex -> Just (colIndex, rowIndex)
+                    Nothing -> findPlayer restRows (rowIndex + 1)
 
 -- Gets the tile type at a given position in the game state
 getTileAt :: (Int, Int) -> [[TileType]] -> TileType
